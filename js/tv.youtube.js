@@ -2,19 +2,21 @@
  *  youtube singleton oh yeah! 
  */
 var youtube = {
-    obj: null, //will hold the current youtube embed
-
-    togglePlay: function(){
-        //unstarted (-1), ended (0), playing (1), 
-        //paused (2), buffering (3), video cued (5)
-        if(youtube.obj.getPlayerState() !== 1){
-            youtube.obj.playVideo();
-        }else{
-            youtube.obj.pauseVideo();
-        }
+    player: null,
+    afterLoad: function(){
+    	youtube.player = new YT.Player("ytplayer", {events: {onStateChange: youtube.stateListener, onError:errorListener}});
     },
 
-    stateListener: function(state){
+    togglePlay: function(){
+	if(youtube.player.getPlayerState() == YT.PlayerState.PLAYING){
+		youtube.player.pauseVideo();
+	} else {
+		youtube.player.playVideo();
+	}
+    },
+
+    stateListener: function(evt){
+	var state = evt.data;
 
         if (Globals.cur_chan === -1) {
 
@@ -35,12 +37,6 @@ var youtube = {
                 loadVideo('next');  //tv.js
             }else if(state === -1){
                 youtube.togglePlay();
-            }else if(state === 1){
-                var qual = youtube.obj.getPlaybackQuality();
-                var avail = youtube.obj.getAvailableQualityLevels();
-                if((qual === 'small' || qual === 'medium') && avail.indexOf('large') !== -1){
-                    youtube.obj.setPlaybackQuality('large');
-                }
             }
         }
     },
@@ -75,9 +71,12 @@ var youtube = {
         }
         
         if(ID){
-            data.embed = "&lt;object width=\"600\" height=\"338\"&gt;&lt;param name=\"movie\" value=\"http://www.youtube.com/v/"
-            +ID+"?version=3&amp;feature=oembed"+time+"\"&gt;&lt;/param&gt;&lt;param name=\"allowFullScreen\" value=\"true\"&gt;&lt;/param&gt;&lt;param name=\"allowscriptaccess\" value=\"always\"&gt;&lt;/param&gt;&lt;embed src=\"http://www.youtube.com/v/"+ID+"?version=3&amp;feature=oembed"+time+"\" type=\"application/x-shockwave-flash\" width=\"600\" height=\"338\" allowscriptaccess=\"always\" allowfullscreen=\"true\"&gt;&lt;/embed&gt;&lt;/object&gt;";
-            data.thumbnail = "http://i2.ytimg.com/vi/"+ID+"/hqdefault.jpg";
+            data.embed = "&lt;iframe id=\"ytplayer\" type=\"text/html\" frameborder=\"0\" src=\"//www.youtube.com/embed/"+ID+"?enablejsapi=1&amp;autoplay=1\" fs=\"1\" width=\"600\" height=\"338\"&gt;&lt;/iframe&gt;";
+            data.thumbnail = "//i2.ytimg.com/vi/"+ID+"/hqdefault.jpg";
+	    //XXX: note that the URLS above are protocol-relative and do not include http/https
+	    //if the page is loaded is http and the iframe in https or vice-versa, the youtube plugin does not work properly
+	    //one caveat with relative urls is that the page will no longer work when using file:// to view the html file locally.
+	    //if this is deemed to the problem, we can revert to http:// for now and simply assume that no one will visit this site via https://
             return data;
         }else{
             return false;
@@ -86,23 +85,6 @@ var youtube = {
 
     // prepares embed code for js api access
     prepEmbed: function(embed) {
-        var js_str = 'version=3&enablejsapi=1&playerapiid=ytplayer';
-
-        embed = embed.replace(/version\=3/gi, js_str);        
-        embed = embed.replace(/\<embed/i,'<embed id="ytplayer"');
-        embed = embed.replace(/\<iframe/i,'<iframe id="ytplayer"');
-        
         return embed;
     }
 };
-
-/* 
- *  youtube listener - called by youtube flash/html5 when present
- *  MUST REMAIN IN GLOBAL SCOPE
- */
-function onYouTubePlayerReady(playerId) {
-    youtube.obj = document.getElementById("ytplayer");
-    youtube.obj.addEventListener("onStateChange", "youtube.stateListener", true);
-    youtube.obj.addEventListener("onError", "youtube.errorListener", true);
-    youtube.stateListener(-1);
-}
