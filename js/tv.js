@@ -149,7 +149,7 @@ $().ready(function(){
             case arrow.down:  case 74: // j
                 chgChan('down');
                 break;
-            case 32:
+            case 49://space bar
                 togglePlay();
                 break;
             case 70:
@@ -512,6 +512,9 @@ function loadVideo(video) {
         $video_embed.html(embed);
         $video_embed.removeClass('loading');
 
+	//XXX: does this cause bugs when non-yt videos load?
+	youtube.afterLoad();
+
         addListeners(Globals.videos[this_chan].video[selected_video].domain);
 
         var reddit_string = redditButton('t3_' + Globals.videos[this_chan].video[selected_video].id);
@@ -843,7 +846,7 @@ function addListeners (type) {
 function fillScreen() {
     var $object, $fill, $filloverlay, fill_screen_domains = ['youtube.com', 'youtu.be'];
     if(fill_screen_domains.indexOf(Globals.videos[Globals.cur_chan].video[Globals.cur_video].domain) !== -1){
-        $object = $('#video-embed embed');
+        $object = $('#video-embed embed,#video-embed iframe');
         $fill = $('#fill');
         $filloverlay = $('#fill-overlay');
         if($object.hasClass('fill-screen')){
