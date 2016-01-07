@@ -149,7 +149,7 @@ $().ready(function(){
             case arrow.down:  case 74: // j
                 chgChan('down');
                 break;
-            case 32:
+            case 49://space bar
                 togglePlay();
                 break;
             case 70:
