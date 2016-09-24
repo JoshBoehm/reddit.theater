@@ -56,7 +56,7 @@ var youtube = {
         }
         
         if(ID){
-            data.embed = "&lt;iframe id=\"ytplayer\" type=\"text/html\" frameborder=\"0\" src=\"//www.youtube.com/embed/"+ID+"?enablejsapi=1&amp;autoplay=1\" fs=\"1\" width=\"600\" height=\"338\"&gt;&lt;/iframe&gt;";
+            data.embed = "&lt;iframe id=\"ytplayer\" allowfullscreen=\"allowfullscreen\" type=\"text/html\" frameborder=\"0\" src=\"https://www.youtube.com/embed/"+ID+"?enablejsapi=1&amp;autoplay=1\" fs=\"1\" width=\"600\" height=\"338\"&gt;&lt;/iframe&gt;";
             data.thumbnail = "//i2.ytimg.com/vi/"+ID+"/hqdefault.jpg";
 	    //XXX: note that the URLS above are protocol-relative and do not include http/https
 	    //if the page is loaded is http and the iframe in https or vice-versa, the youtube plugin does not work properly
